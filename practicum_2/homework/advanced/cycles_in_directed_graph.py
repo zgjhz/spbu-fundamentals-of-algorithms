@@ -9,7 +9,7 @@ TEST_GRAPH_FILES = [
 ]
 
 
-def has_cycles(g: nx.Graph):
+def has_cycles(g: nx.DiGraph):
     ##########################
     ### PUT YOUR CODE HERE ###
     ##########################
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     for filename in TEST_GRAPH_FILES:
         # Load the graph
         G = nx.read_edgelist(
-            os.path.join("practicum_2", "homework", filename), create_using=nx.Graph
+            os.path.join("practicum_2", "homework", filename), create_using=nx.DiGraph
         )
         # Output whether it has cycles
         print(f"Graph {filename} has cycles: {has_cycles(G)}")

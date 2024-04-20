@@ -23,9 +23,6 @@ def plot_graph(G):
         nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
 
 def has_cycles(g: nx.DiGraph):
-    # visited = set()
-    # stack = set()
-
     def dfs(node, visited=set(), path=set()):
         if node in path:
             return True

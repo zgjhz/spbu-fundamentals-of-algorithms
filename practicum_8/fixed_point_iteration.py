@@ -4,48 +4,63 @@ import numpy as np
 import scipy.io
 import matplotlib.pyplot as plt
 
-from src.common import NDArrayFloat
-from src.linalg import get_scipy_solution
+import numpy as np
+from numpy.typing import NDArray
+NDArrayInt = NDArray[np.int_]
+NDArrayFloat = NDArray[np.float_]
+import scipy.linalg
+def get_scipy_solution(A, b):
+    lu_and_piv = scipy.linalg.lu_factor(A)
+    return scipy.linalg.lu_solve(lu_and_piv, b)
+
+
+def get_numpy_eigenvalues(A):
+    return np.linalg.eigvals(A)
 
 
 def fixed_point_iteration(
     T: NDArrayFloat, c: NDArrayFloat, n_iters: int
 ) -> NDArrayFloat:
+    
+    solution_history = np.zeros((n_iters, T.shape[0]))
+    u_i = np.random.rand(T.shape[0])
+    for i in range(n_iters):
+        u_i = T @ u_i + c
+        solution_history[i] = u_i
 
-    ##########################
-    ### PUT YOUR CODE HERE ###
-    ##########################
-
-    pass
+    return solution_history
 
 
 def jacobi_method(A: NDArrayFloat, b: NDArrayFloat, n_iters: int) -> NDArrayFloat:
+    D_inv = np.diag(1.0 / np.diag(A))
+    L = -np.tril(A, k=-1)
+    U = -np.triu(A, k=1)
+    T = D_inv @ (L + U)
+    c = D_inv @ b
 
-    ##########################
-    ### PUT YOUR CODE HERE ###
-    ##########################
-
-    pass
+    return fixed_point_iteration(T, c, n_iters=n_iters)
 
 
 def gauss_seidel_method(A: NDArrayFloat, b: NDArrayFloat, n_iters: int) -> NDArrayFloat:
-
-    ##########################
-    ### PUT YOUR CODE HERE ###
-    ##########################
-
-    pass
+    D = np.diag(np.diag(A))
+    L = -np.tril(A, k=-1)
+    U = -np.triu(A, k=1)
+    DL_inv = np.linalg.inv(D - L)
+    T = DL_inv @ U
+    c = DL_inv @ b
+    return fixed_point_iteration(T, c, n_iters=n_iters)
 
 
 def relaxation_method(
     A: NDArrayFloat, b: NDArrayFloat, omega: float, n_iters: int
 ) -> NDArrayFloat:
-
-    ##########################
-    ### PUT YOUR CODE HERE ###
-    ##########################
-
-    pass
+    D = np.diag(np.diag(A))
+    L = -np.tril(A, k=-1)
+    U = -np.triu(A, k=1)
+    DL_inv = np.linalg.inv(D - omega * L)
+    T = DL_inv @ ((1-omega) * D + omega * U)
+    c = omega * DL_inv @ b
+    return fixed_point_iteration(T, c , n_iters=n_iters)
 
 
 def relative_error(x_true, x_approx):
@@ -67,7 +82,7 @@ if __name__ == "__main__":
     # bcsstk14.mtx.gz (pos.def., K = O(10^10))
 
     path_to_matrix = os.path.join(
-        "practicum_6", "homework", "advanced", "matrices", "orsirr_1.mtx.gz"
+        "practicum_6", "homework", "advanced", "matrices", "bcsstk14.mtx.gz"
     )
     A = scipy.io.mmread(path_to_matrix).todense().A
     b = np.ones((A.shape[0],))

@@ -6,25 +6,45 @@ from numpy.typing import DTypeLike
 import scipy.io
 import matplotlib.pyplot as plt
 
-from src.common import NDArrayFloat
-from src.linalg import get_scipy_solution
+from numpy.typing import NDArray
+NDArrayInt = NDArray[np.int_]
+NDArrayFloat = NDArray[np.float_]
+import scipy.linalg
+def get_scipy_solution(A, b):
+    lu_and_piv = scipy.linalg.lu_factor(A)
+    return scipy.linalg.lu_solve(lu_and_piv, b)
 
 
-def conjugate_gradient_descent(
+def get_numpy_eigenvalues(A):
+    return np.linalg.eigvals(A)
+
+
+def conjugate_gradient_method(
     A: NDArrayFloat,
     b: NDArrayFloat,
     n_iters: Optional[int] = None,
     dtype: Optional[DTypeLike] = None,
 ) -> NDArrayFloat:
+    solution_history = np.zeros((n_iters, A.shape[0]), dtype=dtype)
+    x_kk = np.zeros_like(b, dtype=dtype)
+    r_kk = b - A @ x_kk
+    v_kk = r_kk
+    for k in range(n_iters):
+        r_kk_norm_squared = r_kk @ r_kk
+        t_kk = r_kk_norm_squared / (v_kk @ (A @ v_kk))
+        x_kk = x_kk + t_kk * v_kk
+        solution_history[k] = x_kk
 
-    ##########################
-    ### PUT YOUR CODE HERE ###
-    ##########################
+        r_kk = r_kk - t_kk * A @ v_kk
+        s_kk = (r_kk @ r_kk) / r_kk_norm_squared
+        v_kk = r_kk + s_kk * v_kk
+    return solution_history
+    
 
-    pass
 
 
-def preconditioned_conjugate_gradient_descent(
+
+def preconditioned_conjugate_gradient_method(
     A: NDArrayFloat,
     b: NDArrayFloat,
     C_inv: NDArrayFloat,
@@ -32,11 +52,22 @@ def preconditioned_conjugate_gradient_descent(
     dtype: Optional[DTypeLike] = None,
 ) -> NDArrayFloat:
 
-    ##########################
-    ### PUT YOUR CODE HERE ###
-    ##########################
+    solution_history = np.zeros((n_iters, A.shape[0]), dtype=dtype)
+    x_kk = np.zeros_like(b, dtype=dtype)
+    r_kk = b - A @ x_kk
+    w_kk = C_inv @ r_kk 
+    v_kk = C_inv.T @ w_kk
+    for k in range(n_iters):
+        w_kk_norm_squared = w_kk @ w_kk
+        t_kk = w_kk_norm_squared / (v_kk @ (A @ v_kk))
+        x_kk = x_kk + t_kk * v_kk
+        solution_history[k] = x_kk
 
-    pass
+        r_kk = r_kk - t_kk * A @ v_kk
+        w_kk = C_inv @ r_kk
+        s_kk = (w_kk @ w_kk) / w_kk_norm_squared
+        v_kk = C_inv @ w_kk + s_kk * v_kk
+    return solution_history
 
 
 def relative_error(x_true, x_approx):
@@ -75,7 +106,7 @@ if __name__ == "__main__":
     n_iters = 1000
 
     # Convergence speed for the conjugate gradient method
-    solution_history = conjugate_gradient_descent(A, b, n_iters=n_iters)
+    solution_history = conjugate_gradient_method(A, b, n_iters=n_iters)
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
     add_convergence_graph_to_axis(ax, exact_solution, solution_history)
@@ -87,9 +118,9 @@ if __name__ == "__main__":
     ### PUT YOUR CODE HERE ###
     ##########################
 
-    C_inv = ...
+    C_inv = np.diag(1.0 / np.sqrt(np.diag(A)))
 
-    solution_history = preconditioned_conjugate_gradient_descent(
+    solution_history = preconditioned_conjugate_gradient_method(
         A, b, C_inv, n_iters=n_iters
     )
 

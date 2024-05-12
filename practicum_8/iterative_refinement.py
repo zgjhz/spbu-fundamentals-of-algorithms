@@ -5,23 +5,62 @@ import numpy as np
 import scipy.io
 import matplotlib.pyplot as plt
 
-from src.common import NDArrayFloat
-from src.linalg import get_scipy_solution
-from practicum_8.conjugate_gradient_method import (
-    conjugate_gradient_descent,
-    relative_error,
-)
+import numpy as np
+from numpy.typing import NDArray
+from numpy.typing import DTypeLike
+NDArrayInt = NDArray[np.int_]
+NDArrayFloat = NDArray[np.float_]
+import scipy.linalg
+def get_scipy_solution(A, b):
+    lu_and_piv = scipy.linalg.lu_factor(A)
+    return scipy.linalg.lu_solve(lu_and_piv, b)
+
+
+def get_numpy_eigenvalues(A):
+    return np.linalg.eigvals(A)
+
+def conjugate_gradient_method(
+    A: NDArrayFloat,
+    b: NDArrayFloat,
+    n_iters: Optional[int] = None,
+    dtype: Optional[DTypeLike] = None,
+) -> NDArrayFloat:
+    solution_history = np.zeros((n_iters, A.shape[0]), dtype=dtype)
+    x_kk = np.zeros_like(b, dtype=dtype)
+    r_kk = b - A @ x_kk
+    v_kk = r_kk
+    for k in range(n_iters):
+        r_kk_norm_squared = r_kk @ r_kk
+        t_kk = r_kk_norm_squared / (v_kk @ (A @ v_kk))
+        x_kk = x_kk + t_kk * v_kk
+        solution_history[k] = x_kk
+
+        r_kk = r_kk - t_kk * A @ v_kk
+        s_kk = (r_kk @ r_kk) / r_kk_norm_squared
+        v_kk = r_kk + s_kk * v_kk
+    return solution_history
+
+def relative_error(x_true, x_approx):
+    return np.linalg.norm(x_true - x_approx, axis=1) / np.linalg.norm(x_true)
 
 
 def iterative_refinement(
     A: NDArrayFloat, b: NDArrayFloat, solver, n_iters: int, n_ir_iters: int
 ) -> NDArrayFloat:
+    print("IR #1 out of {n_ir_iters}")
+    ir_solution_history = np.zeros((n_ir_iters, A.shape[0]), dtype=dtype)
 
-    ##########################
-    ### PUT YOUR CODE HERE ###
-    ##########################
-
-    pass
+    solution_history = conjugate_gradient_method(A, b, n_iters=n_iters, dtype=dtype)
+    x_approx = solution_history[-1, :]
+    ir_solution_history[0] = x_approx
+    for i in range(1, n_ir_iters):
+        print(print(f"IR #{i+1} out of {n_ir_iters}"))
+        solution_history = conjugate_gradient_method(
+            A, b - A @ x_approx, n_iters=n_iters, dtype=dtype
+        )
+        y_approx = solution_history[-1, :]
+        x_approx = x_approx + y_approx
+        ir_solution_history[i] = x_approx
 
 
 def add_convergence_graph_to_axis(
@@ -60,7 +99,7 @@ if __name__ == "__main__":
 
     # Convergence speed for the conjugate gradient method
     ir_solution_history = iterative_refinement(
-        A, b, solver=conjugate_gradient_descent, n_iters=n_iters, n_ir_iters=n_ir_iters
+        A, b, solver=conjugate_gradient_method, n_iters=n_iters, n_ir_iters=n_ir_iters
     )
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))

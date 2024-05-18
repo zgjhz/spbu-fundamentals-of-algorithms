@@ -59,7 +59,7 @@ def get_all_eigenvalues(A: NDArrayFloat) -> NDArrayFloat:
     n = A.shape[0]
     E = np.eye(n)
     n_iters = 10
-    while True:
+    for _ in range(n_iters):
         shift = wilkinson_shift(A)
         Q, R = householder_qr(A - shift * E)
         A = R @ Q + shift * E

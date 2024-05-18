@@ -99,8 +99,8 @@ def solve_via_simulated_annealing(
         cur_exp = math.exp((next_best_loss - cur_loss) / cur_t)
         if (next_best_loss < cur_loss or cur_rng < cur_exp):
             cur_colors = next_best_colors
-        if (loss_history[i] == max(set(loss_history), key=list(loss_history).count)):
-            return loss_history
+        # if (loss_history[i] == max(set(loss_history), key=list(loss_history).count)):
+        #     return loss_history
 
     return loss_history
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     G = nx.erdos_renyi_graph(n=100, p=0.05, seed=seed)
     plot_graph(G)
 
-    n_max_iters = 200
+    n_max_iters = 500
     n_max_colors = 3
     initial_colors = np.random.randint(low=0, high=n_max_colors - 1, size=len(G.nodes))
 

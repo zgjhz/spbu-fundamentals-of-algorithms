@@ -50,7 +50,7 @@ def has_cycles(g: nx.DiGraph):
 if __name__ == "__main__":
     for filename in TEST_GRAPH_FILES:
         # Load the graph
-        G = nx.read_edgelist(f'/Users/mac/Desktop/pershinHomework/practicum_2/practicum_2/homework/advanced/{filename}', create_using=nx.DiGraph)
+        G = nx.read_edgelist(f'/Users/mac/Desktop/Pershin/spbu-fundamentals-of-algorithms/practicum_2/homework/advanced/{filename}', create_using=nx.DiGraph)
         # Output whether it has cycles
         start_time = time.time()
         print(f"Graph {filename} has cycles: {has_cycles(G)}")

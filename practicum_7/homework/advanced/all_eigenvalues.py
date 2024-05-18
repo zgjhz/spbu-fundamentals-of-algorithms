@@ -59,12 +59,12 @@ def get_all_eigenvalues(A: NDArrayFloat) -> NDArrayFloat:
     n = A.shape[0]
     E = np.eye(n)
     n_iters = 10
-    for _ in range(n_iters):
+    while True:
         shift = wilkinson_shift(A)
         Q, R = householder_qr(A - shift * E)
         A = R @ Q + shift * E
         ans_proximity = np.sum(np.abs(A - np.diag(np.diag(A))))
-        if ans_proximity < 1e-16:
+        if ans_proximity < 1e-1:
             break
     return np.diag(A)
 

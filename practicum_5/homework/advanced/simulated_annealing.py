@@ -58,7 +58,7 @@ def set_colors(G, colors):
     for n, color in zip(G.nodes, colors):
         G.nodes[n]["color"] = color
 
-def tweak(colors, n_max_colors):
+def tweak(G, colors, n_max_colors):
     new_colors = colors.copy()
     random_node = np.random.choice(list(G.nodes()))
     neighbors = list(G.neighbors(random_node))
@@ -77,10 +77,10 @@ def solve_via_simulated_annealing(
     for i in range(n_iters):
         cur_loss = number_of_conflicts(G, cur_colors)
         loss_history[i] = number_of_conflicts(G, cur_colors)
-        next_best_colors = tweak(cur_colors, n_max_colors)
+        next_best_colors = tweak(G, cur_colors, n_max_colors)
         next_best_loss = number_of_conflicts(G, next_best_colors)
         for _ in range(n_tweaks):
-            next_colors = tweak(cur_colors, n_max_colors)
+            next_colors = tweak(G, cur_colors, n_max_colors)
             next_loss = number_of_conflicts(G, next_colors)
             next_rng = np.random.default_rng().random()
             if (_ != 1 and _ != 0):
